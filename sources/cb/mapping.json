@@ -1,0 +1,78 @@
+{
+    "identity" : [
+        {
+            "source" : "first_name",
+            "target" : "first_name"
+        },
+        {
+            "source" : "last_name",
+            "target" : "last_name"
+        },
+        {
+            "source" : "title",
+            "target" : "job"
+        },
+        {
+            "source" : "homepage_url",
+            "target" : "homepage"
+        },
+        {
+            "source" : "city_name",
+            "target" : "city"
+        },
+        {
+            "source" : "profile_image_url",
+            "target" : "profile_image_urls"
+        },
+        {
+            "source" : "facebook_url",
+            "target" : "facebook_url"
+        },
+        {
+            "source" : "twitter_url",
+            "target" : "twitter_url"
+        },
+        {
+            "source" : "linkedin_url",
+            "target" : "linkedin_url"
+        },
+        {
+            "source" : "orga_name",
+            "target" : "orga_name"
+        },
+        {
+            "source" : "orga_short_description",
+            "target" : "orga_description"
+        },
+        {
+            "source" : "orga_homepage_url",
+            "target" : "orga_homepage"
+        },
+        {
+            "source" : "orga_city_name",
+            "target" : "orga_city"
+        }
+    ],
+    "country_code" : [
+        {
+            "source" : "country_code",
+            "target" : "country"
+        },
+        {
+            "source" : "orga_country_code",
+            "target" : "orga_name"
+        }
+    ],
+    "to_cb_person_url" : [
+        {
+            "source" : "web_path",
+            "target" : "crunchbase_url"
+        }
+    ],
+    "to_cb_organization_url" : [
+        {
+            "source" : "orga_web_path",
+            "target" : "orga_crunchbase_url"
+        }
+    ]
+}

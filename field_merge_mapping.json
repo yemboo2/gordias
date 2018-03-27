@@ -1,0 +1,21 @@
+{
+	"first_name" : "no_merge",
+	"last_name" : "no_merge",
+	"email" : "collect_emails",
+	"city" : "best_field",
+	"country" : "best_field",
+	"keywords" : "union_keywords",
+	"twitter_url" : "best_twitter_link",
+	"crunchbase_url" : "best_crunchbase_link",
+	"xing_url" : "best_xing_link",
+	"linkedin_url" : "best_linkedin_link",
+	"facebook_url" : "best_facebook_link",
+	"image_urls" : "collect_images",
+	"homepage" : "best_field", 
+	"job" : "best_field",
+	"orga_name" : "best_field",
+	"orga_city" : "best_field",
+	"orga_country" : "best_field",
+	"orga_homepage" : "best_field",
+	"orga_crunchbase_url" : "best_crunchbase_link"
+}

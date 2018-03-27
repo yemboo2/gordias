@@ -1,0 +1,52 @@
+{
+    "identity" : [
+        {
+            "source" : "url",
+            "target" : "homepage"
+        },
+        {
+            "source" : "profile_image_url",
+            "target" : "profile_image_urls"
+        }
+    ],
+    "name_split_first" : [
+        {
+            "source" : "name",
+            "target" : "first_name"
+        }
+    ],
+    "name_split_last" : [
+        {
+            "source" : "name",
+            "target" : "last_name"
+        }
+    ],
+    "to_twitter_profil_url" : [
+        {
+            "source" : "screen_name",
+            "target" : "twitter_url"
+        }
+    ],
+    "location_split_city" : [
+        {
+            "source" : "location",
+            "target" : "city"
+        }
+    ],
+    "location_split_country" : [
+        {
+            "source" : "location",
+            "target" : "country"
+        }
+    ],
+    "extract_keywords" : [
+        {
+            "source" : "description",
+            "target" : "keywords"
+        },
+        {
+            "source" : "tweets",
+            "target" : "keywords"
+        }
+    ]
+}
