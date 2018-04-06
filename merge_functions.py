@@ -1,15 +1,16 @@
 # merge_functions.py
 # gordias
 # By Markus Ehringer
-# Date: 23.03.2018
+# Date: 29.03.2018
 
 from collections import Counter
+import notnull
 
-def no_merge(current_value, new_source_value_map):
+def no_merge(contact_id, current_value, new_source_value_map):
 	''' first_name and last_name '''
 	return current_value
 
-def collect_emails(current_value, new_source_value_map):
+def collect_emails(contact_id, current_value, new_source_value_map):
 	''' email - People can have multiple emails but only one per domain'''
 	email_list = list() 
 	for source, value in new_source_value_map.items():
@@ -20,49 +21,50 @@ def collect_emails(current_value, new_source_value_map):
 
 	if not email_list:
 		return ""
-	return ', '.join(email_list)
+	return ', '.join(email_list) 
 
-def best_field(current_value, new_source_value_map):
+def best_field(contact_id, current_value, new_source_value_map):
 	''' city, country '''
-	field_list = list()
+	weighted_field_count_dict = dict()
 	for source, value in new_source_value_map.items():
-		field_list.append(value)
+		if value in weighted_field_count_dict:
+			weighted_field_count_dict[value] += notnull.get_nn_score(contact_id, source)
+		weighted_field_count_dict[value] = notnull.get_nn_score(contact_id, source)
 
-	if not field_list:
+	if not weighted_field_count_dict:
 		return ""
 
-	field_count_dict = Counter(field_list)
-	return max(field_count_dict, key = field_count_dict.get)
+	return max(weighted_field_count_dict, key = weighted_field_count_dict.get)
 
-def union_keywords(current_value, new_source_value_map):
+def union_keywords(contact_id, current_value, new_source_value_map):
 	if current_value:
 		keyword_list = current_value.split(', ')
 	else:
 		keyword_list = list()
-
+	
 	for source, value in new_source_value_map.items():
-		keyword_list = list(set().union(keyword_list, value.split(', ')))
-
-
+		if value:
+			keyword_list = list(set().union(keyword_list, value.split(', ')))
+	
 	return ', '.join(keyword_list)
 
-def best_twitter_link(current_value, new_source_value_map):
+def best_twitter_link(contact_id, current_value, new_source_value_map):
 	''' twitter_url '''
 	return best_link(current_value, new_source_value_map, "twitter")
 
-def best_crunchbase_link(current_value, new_source_value_map):
+def best_crunchbase_link(contact_id, current_value, new_source_value_map):
 	''' crunchbase_url '''
 	return best_link(current_value, new_source_value_map, "crunchbase")
 
-def best_xing_link(current_value, new_source_value_map):
+def best_xing_link(contact_id, current_value, new_source_value_map):
 	''' xing_url '''
 	return best_link(current_value, new_source_value_map, "xing")
 
-def best_linkedin_link(current_value, new_source_value_map):
+def best_linkedin_link(contact_id, current_value, new_source_value_map):
 	''' linkedin_url '''
 	return best_link(current_value, new_source_value_map, "linkedin")
 
-def best_facebook_link(current_value, new_source_value_map):
+def best_facebook_link(contact_id, current_value, new_source_value_map):
 	''' facebook_url '''
 	return best_link(current_value, new_source_value_map, "facebook")
 
@@ -80,7 +82,7 @@ def best_link(current_value, new_source_value_map, website_name):
 	link_count_dict = Counter(link_list)
 	return max(link_count_dict, key = link_count_dict.get)
 
-def collect_images(current_value, new_source_value_map):
+def collect_images(contact_id, current_value, new_source_value_map):
 	''' image_urls - The more pictures the better '''
 	if current_value:
 		image_url_list = current_value.split(", ")

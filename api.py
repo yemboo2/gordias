@@ -1,11 +1,11 @@
 # api.py
 # gordias
 # By Markus Ehringer
-# Date: 21.03.2018
+# Date: 29.03.2018
 
 import enricher
 import json
-from bottle import run, route, request
+from bottle import route, request
 
 
 @route('/contact', method = 'POST')
@@ -17,7 +17,7 @@ def post_contact():
 	
 	contact = dict()
 	if bool(last_name) & bool(first_name):	# Only continue if at least first_name and last_name are not empty 
-		contact["data"] = enricher.enrich_contact(ffirst_name, last_name, organization, age)
+		contact["data"] = enricher.enrich_contact(first_name, last_name, organization, age)
 	
 	return contact
 	
@@ -34,6 +34,7 @@ def post_contacts():
 
 	return contacts
 
-
-def start():
-	run(host = "localhost", port = 8080)
+@route('/contact/id', method = 'PUT')
+def sync_contact():
+	contact_id = request.forms.get('contact_id')
+	enricher.enrich_contact_by_id(contact_id)

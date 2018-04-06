@@ -41,10 +41,6 @@
             "target" : "orga_name"
         },
         {
-            "source" : "orga_short_description",
-            "target" : "orga_description"
-        },
-        {
             "source" : "orga_homepage_url",
             "target" : "orga_homepage"
         },

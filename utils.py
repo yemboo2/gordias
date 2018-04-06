@@ -1,5 +1,11 @@
+# utils.py
+# gordias
+# By Markus Ehringer
+# Date: 05.04.2018
+
 from nltk import word_tokenize, pos_tag
 from nltk.corpus import wordnet as wn
+from googletrans import Translator
 
 def penn_to_wn(tag):
     """ Convert between a Penn Treebank tag to a simplified Wordnet tag """
@@ -42,7 +48,6 @@ def phrase_similarity(phrase1, phrase2):
     synsets2 = [ss for ss in synsets2 if ss]
 
     score, count = 0.0, 0
-
     # For each word in the first phrase
     for synset in synsets1:
         sim_list = list(map((lambda x: synset.path_similarity(x)), synsets2))
@@ -62,12 +67,43 @@ def symmetric_phrase_similarity(phrase1, phrase2):
     """ compute the symmetric phrase similarity using Wordnet """
     return (phrase_similarity(phrase1, phrase2) + phrase_similarity(phrase2, phrase1)) / 2
 
-def similar(phrase1, phrase2, treshold):
-    if (not phrase1) | (not phrase2):
-        return False
-
+def similar(phrase1, phrase2, threshold):
     sim1 = phrase_similarity(phrase1, phrase2)
     sim2 = phrase_similarity(phrase2, phrase1)
     sim3 = symmetric_phrase_similarity(phrase1, phrase2)
+    return (sim1 > threshold) | (sim2 > threshold) | (sim3 > threshold)
 
-    return (sim1 > treshold) | (sim2 > treshold) | (sim3 > treshold)
+def sim(phrase1, phrase2, threshold):
+    if ((not phrase1) | (not phrase2)):
+        return False
+
+    translator = Translator()
+    phrase1_trans = translator.translate(phrase1)
+    phrase2_trans = translator.translate(phrase2)
+
+    return (similar(phrase1_trans.origin, phrase2_trans.origin, threshold) | 
+        similar(phrase1_trans.text, phrase2_trans.origin, threshold) |
+        similar(phrase1_trans.origin, phrase2_trans.text, threshold) |
+        similar(phrase1_trans.text, phrase2_trans.text, threshold))
+
+def description_orga_sim(description, organization, threshold):
+    if not description:
+        return False
+
+    translator = Translator()
+    description_trans = translator.translate(description)
+    organization_trans = translator.translate(organization)
+
+    return (sim(description, organization, threshold) |
+        (organization_trans.origin in description_trans.origin) |
+        (organization_trans.text in description_trans.origin) |
+        (organization_trans.origin in description_trans.text) |
+        (organization_trans.text in description_trans.text))
+
+def keyword_in_description(description = ""):
+    keyword_list = ["Blockchain"]
+
+    for keyword in keyword_list:
+        if keyword in description:
+            return True
+    return False

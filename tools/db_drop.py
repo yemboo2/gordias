@@ -10,7 +10,7 @@ table_names = ["contacts", "twitter", "crunchbase"]
 
 def connect_to_database():
 	global conn
-	with open('database_config.json', 'r') as database_config_file:
+	with open('../database_config.json', 'r') as database_config_file:
 		database_config_json = json.load(database_config_file)
 	
 	try:

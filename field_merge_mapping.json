@@ -10,7 +10,7 @@
 	"xing_url" : "best_xing_link",
 	"linkedin_url" : "best_linkedin_link",
 	"facebook_url" : "best_facebook_link",
-	"image_urls" : "collect_images",
+	"profile_image_urls" : "collect_images",
 	"homepage" : "best_field", 
 	"job" : "best_field",
 	"orga_name" : "best_field",

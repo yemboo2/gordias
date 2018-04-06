@@ -10,7 +10,7 @@ table_names = ["contacts", "twitter", "crunchbase"]
 
 def connect_to_database():
 	global conn
-	with open('database_config.json', 'r') as database_config_file:
+	with open('../database_config.json', 'r') as database_config_file:
 		database_config_json = json.load(database_config_file)
 	
 	try:
@@ -40,15 +40,16 @@ def create_tables():
                 xing_url VARCHAR(100),
                 linkedin_url VARCHAR(100),
                 facebook_url VARCHAR(100),
-                image_urls VARCHAR(250),
+                profile_image_urls VARCHAR(250),
                 homepage VARCHAR(100),
-                job VARCHAR(25),
+                job VARCHAR(50),
                 orga_name VARCHAR(50),
                 orga_city VARCHAR(25),
                 orga_country VARCHAR(25),
                 orga_homepage VARCHAR(100),
                 orga_crunchbase_url VARCHAR(100),
-                last_sync NUMERIC NOT NULL
+                last_sync NUMERIC NOT NULL,
+                sync_interval NUMERIC NOT NULL
         )
     """
 
