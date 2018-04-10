@@ -1,14 +1,15 @@
 # __main__.py
 # gordias
 # By Markus Ehringer
-# Date: 29.03.2018
+# Date: 08.04.2018
 
-import api
-import db
+import database
+import notnull
 import sys
-from bottle import run
 import sync
 import threading
+import api
+from bottle import run
 
 def main():
 	try:
@@ -17,8 +18,7 @@ def main():
 	except:
 		print("Unexpected error: {0}", sys.exc_info()[0])
 	finally:
-		db.close_connection()	
-		import notnull
+		database.close_connection()	
 		notnull.dump_matrices()
 
 if __name__ == "__main__":

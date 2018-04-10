@@ -40,3 +40,5 @@ field_list = ["contact_id", "first_name", "last_name", "email", "city",
 If you add a new source delete both matrices so they can be created new(\&correctly) at the next start.
 
 Google translator: https://github.com/ssut/py-googletrans
+
+https://www.w3schools.com/tags/ref_urlencode.asp

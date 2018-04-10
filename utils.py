@@ -3,6 +3,7 @@
 # By Markus Ehringer
 # Date: 05.04.2018
 
+import json
 from nltk import word_tokenize, pos_tag
 from nltk.corpus import wordnet as wn
 from googletrans import Translator
@@ -71,6 +72,7 @@ def similar(phrase1, phrase2, threshold):
     sim1 = phrase_similarity(phrase1, phrase2)
     sim2 = phrase_similarity(phrase2, phrase1)
     sim3 = symmetric_phrase_similarity(phrase1, phrase2)
+    
     return (sim1 > threshold) | (sim2 > threshold) | (sim3 > threshold)
 
 def sim(phrase1, phrase2, threshold):
@@ -84,26 +86,29 @@ def sim(phrase1, phrase2, threshold):
     return (similar(phrase1_trans.origin, phrase2_trans.origin, threshold) | 
         similar(phrase1_trans.text, phrase2_trans.origin, threshold) |
         similar(phrase1_trans.origin, phrase2_trans.text, threshold) |
-        similar(phrase1_trans.text, phrase2_trans.text, threshold))
+        similar(phrase1_trans.text, phrase2_trans.text, threshold) |
+        (phrase1.lower() in phrase2.lower()) | (phrase2.lower() in phrase1.lower()))
 
 def description_orga_sim(description, organization, threshold):
     if not description:
         return False
-
-    translator = Translator()
-    description_trans = translator.translate(description)
-    organization_trans = translator.translate(organization)
-
-    return (sim(description, organization, threshold) |
-        (organization_trans.origin in description_trans.origin) |
-        (organization_trans.text in description_trans.origin) |
-        (organization_trans.origin in description_trans.text) |
-        (organization_trans.text in description_trans.text))
+    
+    try:
+        translator = Translator()
+        description_trans = translator.translate(description)
+        organization_trans = translator.translate(organization)
+        return (sim(description, organization, threshold) |
+            (organization_trans.origin.lower() in description_trans.origin.lower()) |
+            (organization_trans.text.lower() in description_trans.origin.lower()) |
+            (organization_trans.origin.lower() in description_trans.text.lower()) |
+            (organization_trans.text.lower() in description_trans.text.lower()))
+    except json.decoder.JSONDecodeError:
+        return sim(description, organization, threshold)
 
 def keyword_in_description(description = ""):
-    keyword_list = ["Blockchain"]
+    keyword_list = ["blockchain", "bitcoin"]
 
     for keyword in keyword_list:
-        if keyword in description:
+        if keyword in description.lower():
             return True
     return False

@@ -19,8 +19,8 @@ def collect_data(first_name, last_name, organization):
 		s_class = getattr(mod, source["class_name"])
 		s_class_inst = s_class(first_name, last_name, organization)
 		data = s_class_inst.get_data()
-		data_map[source["name"]] = map_data(data, (source["path"].split("/"))[0])
-		
+		data_map[source["table_name"]] = map_data(data, (source["path"].split("/"))[0])	# table_name is key just because it probably represents the source best 
+	
 	return data_map
 
 def map_data(data, source_folder_name):
@@ -42,7 +42,8 @@ def map_data(data, source_folder_name):
 		for source_target_pair in mapping[map_function_name]:
 			try:
 				mapped_data_value = map_function(data[source_target_pair["source"]])
-
+				if not mapped_data_value:
+					continue
 				if source_target_pair["target"] in mapped_data:	# Value mapped on the same target field name needs to merged with the appropriate merge function
 					import merge_functions
 					merge_function = getattr(merge_functions, field_merge_mapping[source_target_pair["target"]])

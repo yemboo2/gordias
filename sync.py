@@ -3,10 +3,10 @@
 # By Markus Ehringer
 # Date: 29.03.2018
 
+import database
 import requests
-from bottle import run, route, request
 import time
-import db
+from bottle import run, route, request
 
 URL_OWN_API = 'http://localhost:8080/contact/id'
 
@@ -19,17 +19,17 @@ def start_sync():
 
 	while True:
 		sync_dict = get_sync_dict()
-		contact_id = min(sync_dict, key=sync_dict.get)
+		contact_id = min(sync_dict, key = sync_dict.get)
 		next_sync_time = sync_dict[contact_id]
 		if next_sync_time <= 0:
-			response = requests.post(URL_OWN_API, data={'contact_id' : contact_id})
+			response = requests.post(URL_OWN_API, data = {'contact_id' : contact_id})
 		else:
 			time.sleep(next_sync_time)	
 
 def get_sync_dict():
 	sync_dict = dict()
 	timestamp = time.time()
-	rows = db.get_sync_fields()
+	rows = database.get_sync_fields()
 
 	for row in rows:
 		next_sync_time = int((float(row[1]) + (float(row[2]))) - float(timestamp))

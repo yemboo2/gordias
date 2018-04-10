@@ -7,6 +7,7 @@ import twitter
 import json
 import os
 import utils
+from nameparser import HumanName
 
 import os,sys,inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -26,16 +27,15 @@ class Twitter(Source):
 
         return user_data
 
-
     def get_user_data(self):
         new_user = dict()
         user_id = ""
         users = api.GetUsersSearch(term = self.first_name + " " + self.last_name)
-
+        users = list(filter(lambda x: ((HumanName(x.name).first == self.first_name) &  (HumanName(x.name).last == self.last_name)), users))
+        print(users)
         for user in users:
-            if ((user.name == self.first_name + " " + self.last_name) | 
-                utils.description_orga_sim(user.description, self.organization, 0.5) |
-                utils.keyword_in_description(user.description)):   
+            if (utils.description_orga_sim(user.description, self.organization, 0.5) |
+                utils.keyword_in_description(user.description)):  # (len(users) == 1) |  
                 new_user["name"] = user.name
                 new_user["screen_name"] = user.screen_name
                 new_user["location"] = user.location
@@ -47,7 +47,6 @@ class Twitter(Source):
         
         return new_user
 
-
     def get_tweet_data(self):
         tweet_texts = list()
         try:
@@ -58,9 +57,6 @@ class Twitter(Source):
             pass
         finally:
             return tweet_texts    
-
-
-        
 
 
 def setup_twitter_api():
