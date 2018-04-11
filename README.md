@@ -1,44 +1,68 @@
 # gordias
-Tool to gather contact information of public available sources.
-TODO...
 
+This prototype takes the information of several APIs, transforms it and stores it in a data warehouse. The gathered data then can be requested over an API.
 
-(Importing the abstract class from the folder above is a bit tricky -> see README file)
-If you plan to overwrite the constructor of the abstract class in the subclass make sure to pass first\_name, last\_name and organization and set these as class variables (see source\_class.py).
+## Getting Started
 
-\subsection{Matching of right user}
-%TODO Describe what we just used in the two sources we have and mention the similarity function
-What if there is no organization/company field and there are multiple persona as a result of an API request?
-What if an organization/company field exists but it's None for every person in the list?
-If either of the field is None then we go throught the person list and check the similarity for first and last name, if only for 1 person the similarity of first and last name is above 0.9 then we return this person, if there multiple persons match this criteria we can't tell for sure which person is the right one and therefore return nothing.
+### Prerequisites
 
+To setup and run the project we first need to get [Docker](https://www.docker.com/community-edition#/download) and [Docker compose](https://docs.docker.com/compose/install/#prerequisites).
 
-\subsection{Phrase similarity calculation}
-%http://nlpforhackers.io/wordnet-sentence-similarity/
+### Installing
 
+Executing the docker-compose file will setup the postgres database in one container (incl. creating the necessary tables) and the python environment in another container and execute the application.
 
+Clone the project,
 
-Country code to country name
-% https://github.com/TuneLab/pycountry-convert
+```
+git clone https://github.com/yemboo2/gordias.git
+```
 
-Nameparser
-%https://github.com/derek73/python-nameparser
+change to the _gordias_ folder and run docker-compose.
 
-Locationparser
-%https://geotext.readthedocs.io/en/latest/readme.html
-%https://github.com/elyase/geotext
+```
+cd goridas && sudo docker-compose up
+```
 
+## Deployment
 
-\begin{lstlisting}[language=Python]
-field_list = ["contact_id", "first_name", "last_name", "email", "city",
-	"country", "keywords", "twitter_url", "crunchbase_url", "xing_url", 
-	"linkedin_url", "facebook_url", "profile_image_urls", "homepage", 
-	"job", "orga_name", "orga_city", "orga_country", "orga_homepage", 
-	"orga_crunchbase_url", "last_sync", "sync_interval"]0
-\end{lstlisting}
+### API
 
-If you add a new source delete both matrices so they can be created new(\&correctly) at the next start.
+The API has two endpoints:
 
-Google translator: https://github.com/ssut/py-googletrans
+* _contact_: Enriches a single contact (POST-request). Parameters are first name, last name and organization.
+* _contacts_: Enriches multiple contacts (POST-request). Parameter is a string in JSON format containing a list of basic contact fields: for each contact which should be enriched we need first name, last name and organization.
 
-https://www.w3schools.com/tags/ref_urlencode.asp
+First name and last name must be provided in every case. If organization data is missing matching of the correct contact at the individual data sources cannot be guaranteed. Both endpoints return a JSON object with the found contact fields.
+
+An additional parameter _age_ can be added to each request. Providing this information the user can define how old the enriched data can be. If the last synchronization time of a contact lies further back than the time of the request subtracted by the age the data will be synchronized with the sources. The value of this parameter is specified in hours.
+
+_Note_: Make sure to use HTML encoding for the data sent to the API. 
+
+### Adding new sources
+
+1. Create a new folder in the _sources_ directory.
+2. Create a new python file in that folder.
+3. Create a class which inherits from the class defined in the _source\_class.py_ file and implement the _get\_data()_ function.
+4. Add a new entry to the _sources\_config.json_ file.
+	1. _name_: Simply the name of the source (only letters).
+	2. _path_: Path to the file that contains the class _class\_name_.
+	3. _class\_name_: Name of the class that inherits from the abstract source class.
+5. Adding a mapping configuration file _mapping.json_.
+6. If needed add an additional file _map\_functions.py_ with source-specific map functions.
+
+Importing the abstract class from the folder above is a bit tricky. If you have troubles check out an existing source (e.g. Twitter(_/tw_)).If you plan to overwrite the constructor of the abstract class in the subclass make sure to pass first\_name, last\_name and organization and set these as class variables (see source\_class.py).
+
+The _class\_name_ file has to contain the logic to fetch data from the actual source. When retrieving multiple user from APIs matching the right one based on just the name and organization might be difficult. The _utils.py_ contains some functions to support the matching process. In doubt if you match the correct person there are two options: Taking the contact and risk having maybe wrong data in the system or taking no contact and risk maybe losing correct data. So far we stuck to the latter option. All added sources have to stick to that decision.
+
+## Contributing
+
+After locally adding a new source to the project and testing it extensively one can create a pull request for this source to be added. If it meets all requirements it will be merged.
+
+## Authors
+
+* **Markus Ehringer** - *Initial work* - [yemboo2](https://github.com/yemboo2)
+
+## Acknowledgments
+
+Special thanks to my supervisor **Patrick Holl** for his help and inspiring ideas.
