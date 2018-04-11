@@ -19,8 +19,10 @@ def collect_data(first_name, last_name, organization):
 		s_class = getattr(mod, source["class_name"])
 		s_class_inst = s_class(first_name, last_name, organization)
 		data = s_class_inst.get_data()
-		data_map[source["table_name"]] = map_data(data, (source["path"].split("/"))[0])	# table_name is key just because it probably represents the source best 
+		data_map[source["name"]] = map_data(data, (source["path"].split("/"))[0])	# table_name is key just because it probably represents the source best 
 	
+	data_map = dict(list(filter(lambda z: bool(z[1]), data_map.items())))
+
 	return data_map
 
 def map_data(data, source_folder_name):

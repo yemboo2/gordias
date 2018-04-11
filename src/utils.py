@@ -4,6 +4,10 @@
 # Date: 05.04.2018
 
 import json
+import nltk
+nltk.download('popular')
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
 from nltk import word_tokenize, pos_tag
 from nltk.corpus import wordnet as wn
 from googletrans import Translator
@@ -90,7 +94,8 @@ def sim(phrase1, phrase2, threshold):
         (phrase1.lower() in phrase2.lower()) | (phrase2.lower() in phrase1.lower()))
 
 def description_orga_sim(description, organization, threshold):
-    if not description:
+    #if not description: #TODO
+    if ((not description) | (not organization)):
         return False
     
     try:

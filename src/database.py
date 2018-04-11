@@ -6,21 +6,28 @@
 import psycopg2
 import json
 import utils
+import os
+import time
+import logging
 
 DEFAULT_SYNC_INTERVAL = 24.0 * 60 * 60 # in s
 
 def connect_to_database():
 	global conn
-	with open('database_config.json', 'r') as database_config_file:
-		database_config_json = json.load(database_config_file)
 	
-	try:
-		conn = psycopg2.connect("dbname='" + database_config_json["dbname"] + 
-								"' user='" + database_config_json["user"] + 
-								"' host='" + database_config_json["host"] + 
-								"' password='" + database_config_json["password"] + "'")
-	except Exception as e:
-		raise e
+	db_name = os.getenv("DB_NAME", "gordias_test")
+	db_user = os.getenv("DB_USER", "gordias1")
+	db_host = os.getenv("DB_HOST", "localhost")
+	db_password = os.getenv("DB_PASSWORD", "pg55_2.0")
+
+	while True:
+		try:
+			time.sleep(3)
+			conn = psycopg2.connect("dbname='{}' user='{}' host='{}' password='{}'".format(db_name, db_user, db_host, db_password))
+			logging.info("Database connected")
+			break
+		except Exception as e:
+			logging.exception("dbname='{}' user='{}' host='{}' password='{}'".format(db_name, db_user, db_host, db_password))
 
 ### SELECT ###
 
@@ -40,6 +47,7 @@ def get_contact_by_name(first_name, last_name, organization_name):
 	last_name_contact_id_list = list(map(lambda x: x[0], rows))
 	name_contact_id_list = set(first_name_contact_id_list).intersection(last_name_contact_id_list)
 	
+	''' Match the remaining contacts' organization field to get a contact-ID'''
 	contact_id = None
 	if len(name_contact_id_list) == 1:
 		contact_id = list(name_contact_id_list)[0]
@@ -53,24 +61,36 @@ def get_contact_by_name(first_name, last_name, organization_name):
 	if not contact_id:
 		return tuple([None]*4)
 
-	return get_contact_by_id('contacts', contact_id)
-	
-def get_contact_by_id(table_name, contact_id):
 	# retrieve data from contacts table
-	rows = get(table_name, '*', "contact_id = '{}'".format(contact_id))
+	rows = get("contacts", "last_sync, sync_interval", "contact_id = '{}'".format(contact_id))
 	if not rows:
 		return tuple([None]*4)
-	contact_last_sync = rows[0][1]
+	contact_last_sync = rows[0][0]
 	contact_sync_interval = rows[0][1]
 
 	# retrieve all fields in contacts_values tables
-	contact_data = dict()
-	values_table_name = table_name + "_values"
-	rows = get(table_name + "_values", "field_name, value", "contact_id = '{}'".format(contact_id))
-	for row in rows:
-		contact_data[row[0]] = row[1]
+	contact_data = get_contact_values("contacts_values", "contact_id = '{}'".format(contact_id))
 
 	return contact_id, contact_data, contact_last_sync, contact_sync_interval
+
+def get_source_contact_by_id(source_name, contact_id):
+	# retrieve sync_interval from contacts table
+	rows = get("sources_contacts", "sync_interval", "contact_id = '{}' AND source_name = '{}'".format(contact_id, source_name))
+	if not rows:
+		return tuple([None]*2)
+	contact_sync_interval = rows[0][0]
+
+	# retrieve all fields in sources_contacts_values tables
+	contact_data = get_contact_values("sources_contacts_values", "contact_id = {} AND source_name = '{}'".format(contact_id, source_name))
+	return contact_data, contact_sync_interval
+
+def get_contact_values(table_name, where):
+	# retrieve all fields from xxx_values table
+	contact_data = dict()
+	rows = get(table_name, "field_name, value", where)
+	for row in rows:
+		contact_data[row[0]] = row[1]
+	return contact_data
 
 def get(table_name, columns, where):
 	cur = conn.cursor()
@@ -87,9 +107,9 @@ def get_contact_ids():
 	cur.close()
 	return contact_id_list
 
-def get_avg_sync_interval(table_name):
+def get_avg_source_sync_interval(source_name):
 	cur = conn.cursor()
-	cur.execute("SELECT AVG (sync_interval) FROM {}".format(table_name))
+	cur.execute("SELECT AVG (sync_interval) FROM sources_contacts WHERE source_name = '{}'".format(source_name))
 	rows = cur.fetchall()
 	cur.close()
 
@@ -107,22 +127,18 @@ def get_sync_fields():
 
 ### WRITE ###
 
-def write_contact(contact_id, source_data, last_sync, sync_interval):
+def write_contact(contact_id, data, last_sync, sync_interval):
 	write("contacts", "contact_id, last_sync, sync_interval", "{}, {}, {}".format(contact_id, last_sync, sync_interval))
-	write_contact_values("contacts_values", contact_id, source_data)
+	for field_name, value in data.items():
+		write("contacts_values", "contact_id, field_name, value", "{}, '{}', '{}'".format(contact_id, field_name, value))
 	conn.commit()
 
-def write_source_contact(table_name, contact_id, source_data, sync_interval):
-	write(table_name, "contact_id, sync_interval", "{}, {}".format(contact_id, sync_interval))
-	write_contact_values(table_name + "_values", contact_id, source_data)
+def write_source_contact(source_name, contact_id, source_data, sync_interval):
+	write("sources_contacts", "contact_id, source_name, sync_interval", "{}, '{}', {}".format(contact_id, source_name, sync_interval))
+	for field_name, value in source_data.items():
+		write("sources_contacts_values", "contact_id, source_name, field_name, value", "{}, '{}', '{}', '{}'".format(contact_id, source_name, field_name, value))
 	conn.commit()
 	
-def write_contact_values(table_name, contact_id, data):
-	cur = conn.cursor()
-	for field_name, value in data.items():
-		write(table_name, "contact_id, field_name, value", "{}, '{}', '{}'".format(contact_id, field_name, value))
-	cur.close()
-
 def write(table_name, columns, values):
 	cur = conn.cursor()
 	cur.execute("INSERT INTO {} ({}) VALUES ({})".format(table_name, columns, values))
@@ -130,21 +146,17 @@ def write(table_name, columns, values):
 
 ### UPDATE ###
 
-def update_contact(contact_id, source_data, last_sync, sync_interval):
+def update_contact(contact_id, data, last_sync, sync_interval):
 	update("contacts", ["last_sync", "sync_interval"], [last_sync, sync_interval], "contact_id = {}".format(contact_id))
-	update_contact_values("contacts_values", contact_id, source_data)
+	for field_name, value in data.items():
+		update("contacts_values", ["value"], [value], "contact_id = {} AND field_name = '{}'".format(contact_id, field_name))
 	conn.commit()
 
-def update_source_contact(table_name, contact_id, source_data, sync_interval):
-	update(table_name, ["sync_interval"], [sync_interval], "contact_id = {}".format(contact_id))
-	update_contact_values(table_name + "_values", contact_id, source_data)
+def update_source_contact(source_name, contact_id, source_data, sync_interval):
+	update("sources_contacts", ["sync_interval"], [sync_interval], "contact_id = {} AND source_name = '{}'".format(contact_id, source_name))
+	for field_name, value in source_data.items():
+		update("sources_contacts_values", ["value"], [value], "contact_id = {} AND source_name = '{}' AND field_name = '{}'".format(contact_id, source_name, field_name))
 	conn.commit()
-	
-def update_contact_values(table_name, contact_id, data):
-	cur = conn.cursor()
-	for field_name, value in data.items():
-		update(table_name, ["value"], [value], "contact_id = {} AND field_name = '{}'".format(contact_id, field_name))
-	cur.close()
 
 def update(table_name, columns, values, where):
 	cur = conn.cursor()

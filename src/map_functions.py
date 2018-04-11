@@ -8,7 +8,6 @@ from nameparser import HumanName
 from pycountry_convert import (country_alpha2_to_country_name, country_alpha3_to_country_alpha2)
 import nltk
 
-
 def identity(field):
 	return field
 

@@ -60,8 +60,11 @@ class CrunchBase(Source):
         if not crunchbase_organization_name:
             return new_organization
 
-        response = requests.request("GET", base_url + odm_organization + "name=" + crunchbase_organization_name 
-            + "&user_key=" + user_key)
+        while True:
+            response = requests.request("GET", base_url + odm_organization + "name=" + crunchbase_organization_name + "&user_key=" + user_key)
+            if response.status_code != 401: # Workaround: sometimes '401 - Unauthorized user_key'
+                break
+        
         response_json = json.loads(response.text)
         organization_list = response_json["data"]["items"]
 

@@ -32,10 +32,10 @@ class Twitter(Source):
         user_id = ""
         users = api.GetUsersSearch(term = self.first_name + " " + self.last_name)
         users = list(filter(lambda x: ((HumanName(x.name).first == self.first_name) &  (HumanName(x.name).last == self.last_name)), users))
-        print(users)
+        
         for user in users:
             if (utils.description_orga_sim(user.description, self.organization, 0.5) |
-                utils.keyword_in_description(user.description)):  # (len(users) == 1) |  
+                utils.keyword_in_description(user.description)):
                 new_user["name"] = user.name
                 new_user["screen_name"] = user.screen_name
                 new_user["location"] = user.location

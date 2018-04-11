@@ -59,13 +59,12 @@ def update_nn_score_matrix(contact_id):
 
 def avg_sum_nn_sc(contact_id, source_name):
 	''' Values are the number of fields not null for a source and contact divided by the number of fields a source contributes to '''
-	contact_id, contact_data, contact_last_sync, contact_sync_interval = \
-		database.get_contact_by_id(source_name, contact_id)
+	source_contact_data, source_contact_sync_interval = database.get_source_contact_by_id(source_name, contact_id)
 
-	if not contact_data:
+	if not source_contact_data:
 		return 0.0
 
-	sum_nn = len(contact_data) - len(source_field_names[source_name])
+	sum_nn = len(source_contact_data) - len(source_field_names[source_name])
 	return sum_nn / len(source_field_names[source_name])
 
 def get_nn_score(contact_id, source_name):
@@ -89,14 +88,14 @@ def setup_notnull():
 	source_name_list = list()
 
 	for source in source_list:
-		source_name_list.append(source["table_name"])
+		source_name_list.append(source["name"])
 		source_field_name_set = set()
 		with open('sources/' + (source["path"].split("/"))[0] + '/mapping.json', 'r') as mapping_data_file:
 			mapping = json.load(mapping_data_file)
 		for key, value_target_pair_list in mapping.items():
 			for value_target_pair in value_target_pair_list:
 				source_field_name_set.add(value_target_pair["target"])
-		source_field_names[source["table_name"]] = list(source_field_name_set)
+		source_field_names[source["name"]] = list(source_field_name_set)
 
 	load_matrices()		
 

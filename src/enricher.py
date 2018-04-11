@@ -27,13 +27,11 @@ def enrich_contact_by_id(contact_id):
 
 def enrich_contact(first_name, last_name, organization, age_str):
 	timestamp = time.time()
-	
 	contact_id, database_contact_data, contact_last_sync, contact_sync_interval = \
 		database.get_contact_by_name(first_name, last_name, organization)
 
 	''' Check if data exists in database '''
 	if database_contact_data:
-		print("update")
 		if age_str:
 			age = float(age_str) * 60 * 60
 		else:
@@ -46,8 +44,7 @@ def enrich_contact(first_name, last_name, organization, age_str):
 			min_sync_interval = float("Inf")
 			''' Update source contacts'''
 			for source_name, source_contact_data in data.items():
-				contactid, database_source_contact_data, source_contact_last_sync, source_contact_sync_interval = \
-					database.get_contact_by_id(source_name, contact_id)
+				database_source_contact_data, source_contact_sync_interval = database.get_source_contact_by_id(source_name, contact_id)
 				sync_interval = float(source_contact_sync_interval)
 				if database_source_contact_data == source_contact_data:
 					sync_interval = sync_interval * 1.05
@@ -67,8 +64,7 @@ def enrich_contact(first_name, last_name, organization, age_str):
 	else:
 		''' Enrich contact '''
 		data = datacollector.collect_data(first_name, last_name, organization)
-		data = dict(list(filter(lambda z: bool(z[1]), data.items())))
-		print("{} {} - {}".format(first_name, last_name, list(map(lambda x: x[0], data.items()))))
+
 		''' Check if at least one source could get some data '''
 		if not data:
 			return "{}"
@@ -83,7 +79,7 @@ def enrich_contact(first_name, last_name, organization, age_str):
 		contact_sync_interval = 0.0
 
 		for source_name, source_data in data.items():
-			sync_interval = database.get_avg_sync_interval(source_name)
+			sync_interval = database.get_avg_source_sync_interval(source_name)
 			''' Sync interval of merged contact is the minimum of the sync intervals of the sources '''
 			if contact_sync_interval < sync_interval:
 				contact_sync_interval = sync_interval
