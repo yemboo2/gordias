@@ -5,6 +5,7 @@ services:
     image: postgres:10-alpine
     volumes:
       - ./postgres/tables_init.sql:/docker-entrypoint-initdb.d/tables_init.sql
+      - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: 'pg55_2.0'
       POSTGRES_USER: 'gordias1'
@@ -20,3 +21,6 @@ services:
       DB_HOST: db
     links: 
       - gordias_db:db
+
+volumes:
+  postgres_data:
