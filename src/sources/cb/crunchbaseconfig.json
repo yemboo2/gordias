@@ -1,0 +1,6 @@
+{
+	"base_url" : "https://api.crunchbase.com/v3.1/",
+	"odm_people" : "odm-people?",
+	"odm_organization" : "odm-organizations?", 
+	"user_key" : "7e7074bc051292e5f1ae7799c0d881e0"
+}

@@ -1,0 +1,14 @@
+{
+    "sources" : [
+        {
+            "path" : "tw/tw",
+            "name" : "twitter",
+            "class_name" : "Twitter"
+        },
+        {
+            "path" : "cb/cb",
+            "name" : "crunchbase",
+            "class_name" : "CrunchBase"
+        }
+    ]
+}
