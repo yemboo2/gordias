@@ -24,6 +24,12 @@ change to the _gordias_ folder and run docker-compose.
 cd goridas && sudo docker-compose up
 ```
 
+Verfiy setup:
+
+```
+curl --data "contacts={\"contacts\" : [{\"first_name\" : \"Markus\",\"last_name\" : \"Ehringer\",\"organization\" : \"Technical University of Munich\"}]}" http://localhost:8080/contacts --data "age=1"
+```
+
 ## Deployment
 
 ### API
