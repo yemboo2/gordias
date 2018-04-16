@@ -1,7 +1,7 @@
 # database.py
 # gordias
 # By Markus Ehringer
-# Date: 07.04.2018
+# Date: 16.04.2018
 
 import psycopg2
 import json
@@ -10,7 +10,7 @@ import os
 import time
 import logging
 
-DEFAULT_SYNC_INTERVAL = 24.0 * 60 * 60 # in s
+DEFAULT_SYNC_INTERVAL = 7.0 * 24 * 60 * 60 # 1 week in seconds
 
 def connect_to_database():
 	global conn
@@ -72,6 +72,11 @@ def get_contact_by_name(first_name, last_name, organization_name):
 	contact_data = get_contact_values("contacts_values", "contact_id = '{}'".format(contact_id))
 
 	return contact_id, contact_data, contact_last_sync, contact_sync_interval
+
+def get_contact_by_contact_id(contact_id):
+	# retrieve all fields in contacts_values tables
+	contact_data = get_contact_values("contacts_values", "contact_id = '{}'".format(contact_id))
+	return contact_data
 
 def get_source_contact_by_id(source_name, contact_id):
 	# retrieve sync_interval from contacts table

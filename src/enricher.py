@@ -16,14 +16,20 @@ def enrich_contacts(contact_list, age_str):
 	enriched_contact_list = list()
 
 	for contact in contact_list:
-		enriched_contact = enrich_contact(contact["first_name"], contact["last_name"], contact["organization"], age_str)
-		enriched_contact_list.append(enriched_contact)
+		first_name = contact["first_name"]
+		last_name = contact["last_name"]
+		organization = contact["organization"]
+		if bool(last_name) & bool(first_name) & bool(organization):	# Only enrich if first_name, last_name and organization are not empty
+			enriched_contact = enrich_contact(first_name, last_name, organization, age_str)
+			enriched_contact_list.append(enriched_contact)
+		else:
+			enriched_contact_list.append(contact)
 
 	return enriched_contact_list
 
 def enrich_contact_by_id(contact_id):
-	contact = database.get_contact_by_contact_id(contact_id)	
-	enrich_contact(contact["first_name"], contact["first_name"], contact["orga_name"], "0")
+	contact = database.get_contact_by_contact_id(contact_id)
+	enrich_contact(contact["first_name"], contact["last_name"], contact["orga_name"], "0")
 
 def enrich_contact(first_name, last_name, organization, age_str):
 	timestamp = time.time()
@@ -116,6 +122,10 @@ def merge(contact_id, base_data, data):
 		merged_value = new_field.merge(contact_id, new_field_value_map)
 		if merged_value:
 			merged_data[field_name] = merged_value
+
+	# Add orga_name if not already in merged_data
+	if "orga_name" not in merged_data:
+		merged_data["orga_name"] = base_data["orga_name"]
 
 	return merged_data
 

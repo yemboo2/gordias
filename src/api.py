@@ -1,7 +1,7 @@
 # api.py
 # gordias
 # By Markus Ehringer
-# Date: 29.03.2018
+# Date: 16.04.2018
 
 import json
 import logging
@@ -10,6 +10,7 @@ import enricher
 
 @route('/contact', method = 'POST')
 def post_contact():
+	logging.info("API request '/contact'-endpoint")
 	try:
 		first_name = request.forms.get('first_name')
 		last_name = request.forms.get('last_name')
@@ -17,7 +18,7 @@ def post_contact():
 		age = request.forms.get('age')	# in hours
 		
 		contact = dict()
-		if bool(last_name) & bool(first_name):	# Only continue if at least first_name and last_name are not empty
+		if bool(last_name) & bool(first_name) & bool(organization):	# Only continue if first_name, last_name and organization are not empty
 			contact["data"] = enricher.enrich_contact(first_name, last_name, organization, age)
 		return contact
 	except Exception as e:
@@ -27,6 +28,7 @@ def post_contact():
 @route('/')
 @route('/contacts', method = 'POST')
 def post_contacts():
+	logging.info("API request '/contacts'-endpoint")
 	try:
 		data = request.forms.get('contacts')
 		age = request.forms.get('age')
@@ -39,11 +41,9 @@ def post_contacts():
 		logging.exception(str(e))
 		return dict()
 
-@route('/contact/id', method = 'PUT')
+@route('/contact/id', method = 'POST')
 def sync_contact():
 	contact_id = request.forms.get('contact_id')
+	logging.info("Sync, id = {}".format(contact_id))
 	enricher.enrich_contact_by_id(contact_id)
-
-@route('/contacted', method = 'GET') #TODO
-def test():
-	return "Hallo"
+	return dict()

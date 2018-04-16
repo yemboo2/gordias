@@ -6,6 +6,8 @@ services:
     volumes:
       - ./postgres/tables_init.sql:/docker-entrypoint-initdb.d/tables_init.sql
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
     environment:
       POSTGRES_PASSWORD: 'pg55_2.0'
       POSTGRES_USER: 'gordias1'

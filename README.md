@@ -39,11 +39,12 @@ The API has two endpoints:
 * _contact_: Enriches a single contact (POST-request). Parameters are first name, last name and organization.
 * _contacts_: Enriches multiple contacts (POST-request). Parameter is a string in JSON format containing a list of basic contact fields: for each contact which should be enriched we need first name, last name and organization.
 
-First name and last name must be provided in every case. If organization data is missing matching of the correct contact at the individual data sources cannot be guaranteed. Both endpoints return a JSON object with the found contact fields.
+First name and last name and organization must be provided in every case. Both endpoints return a JSON object with the found contact fields.
 
 An additional parameter _age_ can be added to each request. Providing this information the user can define how old the enriched data can be. If the last synchronization time of a contact lies further back than the time of the request subtracted by the age the data will be synchronized with the sources. The value of this parameter is specified in hours.
 
-_Note_: Make sure to use HTML encoding for the data sent to the API. 
+_Note1_: Make sure to use HTML encoding for the data sent to the API.
+_Note2_: It could take a while after the start until the first request will be processed.
 
 ### Adding new sources
 

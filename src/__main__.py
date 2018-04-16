@@ -1,7 +1,7 @@
 # __main__.py
 # gordias
 # By Markus Ehringer
-# Date: 08.04.2018
+# Date: 16.04.2018
 
 import sys
 import sync
@@ -13,6 +13,7 @@ import logging
 from bottle import run
 
 def main():
+	logging.info("Gordias started")
 	try:
 		threading.Thread(target=run, kwargs=dict(host='0.0.0.0', port=8080)).start() # Run API
 		sync.start_sync()

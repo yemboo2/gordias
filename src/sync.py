@@ -1,7 +1,7 @@
 # sync.py
 # gordias
 # By Markus Ehringer
-# Date: 29.03.2018
+# Date: 16.04.2018
 
 import database
 import requests
@@ -13,9 +13,11 @@ URL_OWN_API = 'http://localhost:8080/contact/id'
 def start_sync():
 	time.sleep(1)
 	sync_dict = get_sync_dict()
+	
 	''' Wait until there are any contacts in the database '''
 	while not sync_dict:	
 		time.sleep(1)
+		sync_dict = get_sync_dict()
 
 	while True:
 		sync_dict = get_sync_dict()
@@ -32,7 +34,7 @@ def get_sync_dict():
 	rows = database.get_sync_fields()
 
 	for row in rows:
-		next_sync_time = int((float(row[1]) + (float(row[2]))) - float(timestamp))
-		sync_dict[row[0]] = int((float(row[1]) + (float(row[2]))) - float(timestamp))	# (last_sync + sync_interval) - current time
+		next_sync_time = int((float(row[1]) + (float(row[2]))) - float(timestamp)) # (last_sync + sync_interval) - current time
+		sync_dict[row[0]] = next_sync_time
 
 	return sync_dict 

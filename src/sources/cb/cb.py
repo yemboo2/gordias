@@ -1,7 +1,7 @@
 # cb.py
 # gordias
 # By Markus Ehringer
-# Date: 10.03.2018
+# Date: 16.04.2018
 
 import requests
 import json
@@ -12,8 +12,7 @@ from nameparser import HumanName
 import os,sys,inspect
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir) 
-
+sys.path.insert(0,parentdir)
 from source_class import Source
 
 class CrunchBase(Source):    
@@ -36,7 +35,6 @@ class CrunchBase(Source):
 
         response_json = json.loads(response.text)
         person_list = response_json["data"]["items"]
-        #new_persons = list() # less strict variant 
         
         for person in person_list:
             person = person["properties"]
@@ -45,11 +43,6 @@ class CrunchBase(Source):
                 if (utils.sim(self.organization, person["organization_name"], 2/3) |
                     utils.sim(self.organization, person["title"], 2/3)): # title = job
                     return person
-                #if not person["organization_name"]: # If orga couldn't match because oganization_name = "" add to list
-                #    new_persons.append(person)
-
-        #if len(new_persons) == 1:
-            #return new_persons[0]
 
         return dict()
 
